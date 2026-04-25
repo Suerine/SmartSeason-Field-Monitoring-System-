@@ -7,7 +7,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://smart-season-field-monitoring-syste-one.vercel.app/", // add this after you get your Vercel URL
+  "https://smart-season-field-monitoring-syste-one.vercel.app",
 ];
 
 app.use(
