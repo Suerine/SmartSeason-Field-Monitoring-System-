@@ -164,6 +164,7 @@ const AgentDashboardContainer = () => {
           </div>
         )}
       </div>
+      </div>
     </div>
   );
 };
