@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api, { API_PATHS } from '../../utils/apiPaths';
 import FieldsList from './FieldsList';
-import FieldDetailHeader from './FieldDetailHeader';
 import TaskBox from './TaskBox';
 import StageStepper from './StageStepper';
 import UpdateForm from './UpdateForm';
 import RecentHistory from './RecentHistory';
 
 const AgentDashboardContainer = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [fields, setFields] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
@@ -83,15 +82,15 @@ const AgentDashboardContainer = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       {/* Left Column: Fields List */}
-      <div className="lg:col-span-1">
-        <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden sticky top-8">
-          <div className="px-6 py-4 border-b-2 border-gray-200">
-            <h2 className="font-black text-gray-900">Your Fields</h2>
-            <p className="text-xs text-gray-400 font-bold mt-1">{fields.length} assigned</p>
+      <div className="xl:col-span-1">
+        <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden h-fit">
+          <div className="px-6 py-5 border-b-2 border-gray-200 bg-gradient-to-r from-white to-gray-50">
+            <h3 className="font-black text-gray-900 text-base uppercase tracking-wide">Assigned Fields</h3>
+            <p className="text-xs text-gray-500 font-bold mt-0.5">{fields.length} field{fields.length !== 1 ? 's' : ''}</p>
           </div>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[600px] overflow-y-auto">
             <FieldsList
               fields={fields}
               selectedFieldId={selectedField?._id}
@@ -102,19 +101,27 @@ const AgentDashboardContainer = () => {
       </div>
 
       {/* Right Column: Field Details */}
-      <div className="lg:col-span-2">
+      <div className="xl:col-span-2">
         {selectedField ? (
           <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-black text-gray-900">{selectedField.name}</h1>
-              <p className="text-sm text-gray-400 mt-1">
-                {selectedField.cropType?.name || 'Unknown'} • {selectedField.location || 'Field Location'}
+            {/* Header Card */}
+            <div className="bg-white rounded-2xl border-2 border-gray-200 p-6">
+              <h2 className="text-2xl font-black text-gray-900 mb-1">{selectedField.name}</h2>
+              <p className="text-sm text-gray-500">
+                <span className="font-bold text-gray-700">{selectedField.cropType?.name || 'Unknown Crop'}</span>
+                {selectedField.location && <> • {selectedField.location}</>}
               </p>
+              {selectedField.currentStage && (
+                <div className="mt-4">
+                  <span className="inline-block px-3 py-1.5 bg-green-50 border-2 border-green-200 text-green-700 text-xs font-bold uppercase tracking-wider rounded-lg">
+                    Current Stage: {selectedField.currentStage}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Cards */}
-            <div className="space-y-4">
+            {/* Content Cards */}
+            <div className="space-y-5">
               {/* Care Instructions */}
               <TaskBox
                 careInstructions={
@@ -148,7 +155,7 @@ const AgentDashboardContainer = () => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-96">
+          <div className="flex items-center justify-center h-96 bg-white rounded-2xl border-2 border-gray-200">
             <p className="text-gray-400 font-semibold">Select a field to view details</p>
           </div>
         )}
