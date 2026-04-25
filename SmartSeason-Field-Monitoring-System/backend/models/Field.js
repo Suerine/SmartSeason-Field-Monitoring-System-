@@ -6,7 +6,9 @@ const updateSchema = new mongoose.Schema(
     note: { type: String },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 const fieldSchema = new mongoose.Schema(

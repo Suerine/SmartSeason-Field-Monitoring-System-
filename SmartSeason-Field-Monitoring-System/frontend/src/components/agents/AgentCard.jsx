@@ -7,11 +7,8 @@ const AgentCard = ({ agent, fields, isFiltered, onAgentClick }) => {
   const totalWorkload = agentFields.length;
 
   const activeCount = agentFields.filter(f => f.status?.state === 'Active').length;
-  // Derive health based on pure %
-  let healthScore = 100;
-  if (totalWorkload > 0) {
-    healthScore = Math.round((activeCount / totalWorkload) * 100);
-  }
+
+ 
 
   return (
     <div
@@ -51,27 +48,6 @@ const AgentCard = ({ agent, fields, isFiltered, onAgentClick }) => {
           <div className="flex items-center gap-1.5 text-gray-900 font-bold">
             <Briefcase className="w-4 h-4 text-gray-400" />
             <span>{totalWorkload} Fields</span>
-          </div>
-        </div>
-        <div>
-          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">
-            Health Score
-          </p>
-          <div className="flex items-center gap-1.5">
-            {healthScore >= 80 ? (
-              <CheckCircle className="w-4 h-4 text-green-500" />
-            ) : healthScore >= 50 ? (
-              <Activity className="w-4 h-4 text-orange-400" />
-            ) : (
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-            )}
-            <span
-              className={`font-bold ${
-                healthScore >= 80 ? 'text-green-700' : healthScore >= 50 ? 'text-orange-600' : 'text-red-600'
-              }`}
-            >
-              {totalWorkload === 0 ? 'N/A' : `${healthScore}%`}
-            </span>
           </div>
         </div>
       </div>
