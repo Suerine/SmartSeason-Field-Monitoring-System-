@@ -28,6 +28,8 @@ SmartSeason gives coordinators and field agents a shared view of what's happenin
 - Create new fields and assign them to agents
 - Monitor which agents are active and which have gone quiet
 - View a breakdown of field health across crops and agents
+- Add new crops
+- Add new agents
 
 **Field Agents can:**
 - See only the fields assigned to them
@@ -49,7 +51,7 @@ Every field has a computed status — it's never stored, always calculated fresh
 
 **Completed** — the field's current stage is mapped to the "Harvested" category.
 
-### Stage tracking
+### Stage tracking -> Go to Fields section and click on a field to see full details.
 
 Each crop in the system has detailed growth stages with expected durations (e.g. Maize: Germination → 7 days, Vegetative → 40 days, Flowering → 20 days). The system uses these durations to calculate:
 
