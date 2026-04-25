@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Field = require("../models/Field");
 const Crop = require("../models/Crop");
-const { protect, requireRole } = require("../middleware/auth");
-const { getFieldStatus } = require("../utils/fieldStatus");
+const { protect, requireRole } = require("../middleware/authMiddleware");
+const { getFieldStatus, getStageInfo } = require("../utils/fieldStatus");
 
 const withStatus = (field) => {
   if (!field) return null;
@@ -11,6 +11,10 @@ const withStatus = (field) => {
 
   // We pass the populated cropType to the utility to access growthStages
   fieldObj.status = getFieldStatus(field, field.cropType);
+  
+  // Attach full stage info for frontend progress bars and alerts
+  fieldObj.stageInfo = getStageInfo(field);
+  
   return fieldObj;
 };
 
@@ -95,7 +99,7 @@ router.put("/:id", protect, async (req, res) => {
     }
     // ADMIN LOGIC: Full control
     else {
-      const { name, cropType, plantingDate, currentStage, assignedAgent } =
+      const { name, cropType, plantingDate, currentStage, assignedAgent, note } =
         req.body;
       if (name) field.name = name;
       if (cropType) field.cropType = cropType;
@@ -103,6 +107,14 @@ router.put("/:id", protect, async (req, res) => {
       if (currentStage) field.currentStage = currentStage;
       if (assignedAgent !== undefined)
         field.assignedAgent = assignedAgent || null;
+        
+      if (note) {
+        field.updates.push({
+          stage: currentStage || field.currentStage,
+          note,
+          updatedBy: req.user._id,
+        });
+      }
     }
 
     await field.save();

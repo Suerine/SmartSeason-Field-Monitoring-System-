@@ -9,9 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/fields", require("./routes/fields"));
-app.use("/api/crops", require("./routes/crops"));
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/users", require("./routes/usersRoutes"));
+app.use("/api/fields", require("./routes/fieldsRoutes"));
+app.use("/api/crops", require("./routes/cropsRoutes"));
 
 app.get("/", (req, res) => res.json({ message: "SmartSeason API is running" }));
 
