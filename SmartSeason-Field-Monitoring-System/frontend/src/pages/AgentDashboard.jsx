@@ -1,132 +1,191 @@
 import React, { useState, useEffect } from 'react';
-import api, { API_PATHS } from '../utils/apiPaths';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, AlertCircle, RefreshCw } from 'lucide-react';
-import AgentFieldCard from '../components/agent-dashboard/AgentFieldCard';
-import FieldActionPanel from '../components/agent-dashboard/FieldActionPanel';
+import api, { API_PATHS } from '../utils/apiPaths';
+import AgentDashboardHeader from '../components/agent-dashboard/AgentDashboardHeader';
+import FieldsList from '../components/agent-dashboard/FieldsList';
+import FieldDetailHeader from '../components/agent-dashboard/FieldDetailHeader';
+import TaskBox from '../components/agent-dashboard/TaskBox';
+import StageStepper from '../components/agent-dashboard/StageStepper';
+import UpdateForm from '../components/agent-dashboard/UpdateForm';
+import RecentHistory from '../components/agent-dashboard/RecentHistory';
+import { useNavigate } from 'react-router-dom';
 
 const AgentDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   const [fields, setFields] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedField, setSelectedField] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchFields = async () => {
+  useEffect(() => {
+    fetchAssignedFields();
+  }, [user?.id]);
+
+  const fetchAssignedFields = async () => {
     try {
       setLoading(true);
-      setError(null);
       const { data } = await api.get(API_PATHS.FIELDS.GET_ALL_FIELDS);
-      setFields(data);
+
+      // Filter fields assigned to current user
+      const assignedFields = data.filter(
+        f => f.assignedAgent?._id === user?.id
+      );
+
+      // Map category for each field
+      const fieldsWithCategory = assignedFields.map(field => {
+        let mappedCategory = field.currentStage;
+        if (field.cropType?.growthStages) {
+          const stageObj = field.cropType.growthStages.find(
+            s => s.stageName === field.currentStage
+          );
+          if (stageObj) mappedCategory = stageObj.category;
+        }
+        return { ...field, mappedCategory };
+      });
+
+      setFields(fieldsWithCategory);
+      if (fieldsWithCategory.length > 0) {
+        setSelectedField(fieldsWithCategory[0]);
+      }
     } catch (err) {
-      console.error('Error fetching agent fields:', err);
-      setError('Could not load your fields. Please check your connection.');
+      setError('Failed to load your assigned fields');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchFields();
-  }, []);
-
-  const handleUpdate = async (updateData) => {
+  const handleUpdateField = async (updateData) => {
     try {
-      const { data } = await api.put(API_PATHS.FIELDS.UPDATE_FIELD(selectedField._id), updateData);
-      
-      // Update the fields list with the new data
-      setFields(prev => prev.map(f => f._id === data._id ? data : f));
-      
-      // Update selected field to reflect changes in the panel
-      setSelectedField(data);
+      setIsSubmitting(true);
+      const { data } = await api.put(
+        API_PATHS.FIELDS.UPDATE_FIELD(selectedField._id),
+        {
+          currentStage: updateData.newStage,
+          note: updateData.note
+        }
+      );
+
+      // Update category mapping
+      let mappedCategory = data.currentStage;
+      if (data.cropType?.growthStages) {
+        const stageObj = data.cropType.growthStages.find(
+          s => s.stageName === data.currentStage
+        );
+        if (stageObj) mappedCategory = stageObj.category;
+      }
+
+      const updatedField = { ...data, mappedCategory };
+      setSelectedField(updatedField);
+
+      // Update in fields list
+      setFields(fields.map(f => (f._id === updatedField._id ? updatedField : f)));
+
+      // Show success
+      alert('Field updated successfully!');
     } catch (err) {
-      console.error('Error updating field:', err);
-      throw err; // Re-throw to be handled by the form's error state
+      console.error(err);
+      alert('Failed to update field. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-bold animate-pulse">Loading your daily tasks...</p>
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-bold">Loading your fields...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && fields.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <AgentDashboardHeader agentName={user?.name} onLogout={handleLogout} />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center max-w-sm">
+            <p className="text-red-700 font-bold">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* App Header */}
-      <header className="bg-white border-b border-gray-100 p-6 sticky top-0 z-40">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-1">
-              Agent Portal
-            </h1>
-            <p className="text-2xl font-black text-gray-900 leading-none">
-              My Fields
-            </p>
-          </div>
-          <button 
-            onClick={fetchFields}
-            className="p-3 bg-gray-50 text-gray-400 rounded-2xl active:rotate-180 transition-all duration-500"
-          >
-            <RefreshCw size={20} />
-          </button>
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {/* LEFT SIDE: Fields List */}
+      <div className="lg:w-96 lg:h-screen lg:overflow-y-auto bg-white border-r border-gray-200 flex flex-col">
+        <AgentDashboardHeader agentName={user?.name} onLogout={handleLogout} />
+        <div className="flex-1 overflow-y-auto">
+          <FieldsList
+            fields={fields}
+            selectedFieldId={selectedField?._id}
+            onSelectField={setSelectedField}
+          />
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="p-6 pb-24 max-w-2xl mx-auto">
-        {error ? (
-          <div className="bg-red-50 border-2 border-red-100 p-6 rounded-3xl flex flex-col items-center text-center">
-            <AlertCircle className="text-red-500 w-12 h-12 mb-4" />
-            <h3 className="text-red-900 font-black text-xl mb-2">Sync Error</h3>
-            <p className="text-red-700 font-medium mb-6">{error}</p>
-            <button 
-              onClick={fetchFields}
-              className="px-8 py-3 bg-red-600 text-white rounded-2xl font-bold shadow-lg shadow-red-100"
-            >
-              Retry Connection
-            </button>
-          </div>
-        ) : fields.length > 0 ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-4 text-gray-400">
-              <LayoutDashboard size={16} />
-              <span className="text-xs font-black uppercase tracking-widest">
-                {fields.length} Fields Assigned
-              </span>
-            </div>
-            
-            {fields.map(field => (
-              <AgentFieldCard 
-                key={field._id} 
-                field={field} 
-                onClick={setSelectedField} 
+      {/* RIGHT SIDE: Field Detail */}
+      {selectedField ? (
+        <div className="flex-1 flex flex-col h-screen lg:h-auto overflow-y-auto">
+          <FieldDetailHeader
+            field={selectedField}
+            onBack={() => {
+              if (window.innerWidth < 1024) {
+                setSelectedField(null);
+              }
+            }}
+          />
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-5 pb-20">
+            {/* Care Instructions */}
+            <TaskBox
+              careInstructions={
+                selectedField.cropType?.growthStages?.find(
+                  s => s.stageName === selectedField.currentStage
+                )?.careInstructions
+              }
+              currentStage={selectedField.currentStage}
+            />
+
+            {/* Growth Timeline */}
+            {selectedField.cropType?.growthStages && (
+              <StageStepper
+                stages={selectedField.cropType.growthStages}
+                currentStageName={selectedField.currentStage}
               />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-12 flex flex-col items-center text-center">
-            <div className="bg-gray-50 p-6 rounded-full mb-6">
-              <LayoutDashboard className="text-gray-300 w-12 h-12" />
-            </div>
-            <h3 className="text-gray-900 font-black text-xl mb-2">No Fields Assigned</h3>
-            <p className="text-gray-500 font-medium">
-              You don't have any fields assigned to you yet. Contact your administrator to get started.
-            </p>
-          </div>
-        )}
-      </main>
+            )}
 
-      {/* Detail Overlay */}
-      {selectedField && (
-        <FieldActionPanel 
-          field={selectedField}
-          onClose={() => setSelectedField(null)}
-          onUpdate={handleUpdate}
-        />
+            {/* Update Form */}
+            {selectedField.cropType?.growthStages && (
+              <UpdateForm
+                field={selectedField}
+                stages={selectedField.cropType.growthStages}
+                onSubmit={handleUpdateField}
+                isSubmitting={isSubmitting}
+              />
+            )}
+
+            {/* Recent History */}
+            <RecentHistory updates={selectedField.updates} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-bold">Select a field to view details</p>
+        </div>
       )}
     </div>
   );
