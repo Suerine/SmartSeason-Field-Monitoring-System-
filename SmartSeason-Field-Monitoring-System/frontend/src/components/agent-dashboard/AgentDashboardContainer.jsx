@@ -84,7 +84,7 @@ const AgentDashboardContainer = () => {
 
   return (
     <div className="space-y-6">
-      <NotificationBar fields={fields} />
+      <NotificationBar fields={fields} onSelectField={setSelectedField} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       {/* Left Column: Fields List */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertCircle, Clock, CheckCircle2, Siren, ChevronRight } from 'lucide-react';
 
-const NotificationBar = ({ fields }) => {
+const NotificationBar = ({ fields, onSelectField }) => {
   if (!fields || fields.length === 0) return null;
 
   const notifications = [];
@@ -18,6 +18,7 @@ const NotificationBar = ({ fields }) => {
       if (daysInStage > currentStageInfo.durationDays) {
         notifications.push({
           id: `overdue-${field._id}`,
+          field: field,
           type: 'warning',
           icon: <Clock className="w-4 h-4 text-amber-600" />,
           bgColor: 'bg-amber-50',
@@ -33,6 +34,7 @@ const NotificationBar = ({ fields }) => {
     if (currentStageInfo?.category === 'Ready') {
       notifications.push({
         id: `ready-${field._id}`,
+        field: field,
         type: 'success',
         icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
         bgColor: 'bg-emerald-50',
@@ -52,6 +54,7 @@ const NotificationBar = ({ fields }) => {
     if (daysSinceLastUpdate >= 3 && currentStageInfo?.category !== 'Harvested') {
       notifications.push({
         id: `stale-${field._id}`,
+        field: field,
         type: 'error',
         icon: <AlertCircle className="w-4 h-4 text-rose-600" />,
         bgColor: 'bg-rose-50',
@@ -76,6 +79,7 @@ const NotificationBar = ({ fields }) => {
         {notifications.map((note) => (
           <div 
             key={note.id}
+            onClick={() => onSelectField && onSelectField(note.field)}
             className={`flex-shrink-0 w-80 ${note.bgColor} border-2 ${note.borderColor} rounded-2xl p-4 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer group`}
           >
             <div className="flex gap-3 items-start">
