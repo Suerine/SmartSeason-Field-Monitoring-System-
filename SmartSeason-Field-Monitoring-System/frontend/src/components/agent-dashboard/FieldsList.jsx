@@ -1,91 +1,85 @@
 import React from 'react';
-import { Leaf, MapPin } from 'lucide-react';
+import { ChevronRight, MapPin } from 'lucide-react';
 
 const FieldsList = ({ fields, selectedFieldId, onSelectField }) => {
-  if (!fields || fields.length === 0) {
+  if (fields.length === 0) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-gray-500 font-medium">No fields assigned yet</p>
+      <div className="p-12 text-center">
+        <p className="text-gray-500 text-xs font-black uppercase tracking-widest">No Fields Assigned</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 p-6">
-      {fields.map((field) => (
-        <FieldCard
-          key={field._id}
-          field={field}
-          isSelected={selectedFieldId === field._id}
-          onSelect={onSelectField}
-        />
-      ))}
+    <div className="divide-y divide-white/5">
+      {fields.map((field) => {
+        const isSelected = selectedFieldId === field._id;
+        const currentStageInfo = field.cropType?.growthStages?.find(s => s.stageName === field.currentStage);
+        
+        return (
+          <div
+            key={field._id}
+            onClick={() => onSelectField(field)}
+            className={`group relative p-6 cursor-pointer transition-all duration-300 ${
+              isSelected 
+                ? 'bg-green-500/10' 
+                : 'hover:bg-white/[0.02]'
+            }`}
+          >
+            {/* Selection indicator */}
+            {isSelected && (
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
+            )}
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                    isSelected ? 'bg-green-500 text-white border-green-500' : 'bg-white/5 text-gray-400 border-white/10'
+                  }`}>
+                    {field.cropType?.name || 'CROP'}
+                  </span>
+                  {field.currentStage && (
+                    <span className="text-[9px] font-bold text-green-500/60 uppercase tracking-tighter">
+                      {field.currentStage}
+                    </span>
+                  )}
+                </div>
+                
+                <h4 className={`text-lg font-black tracking-tight truncate transition-colors ${
+                  isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'
+                }`}>
+                  {field.name}
+                </h4>
+
+                <div className="flex items-center gap-2 mt-1 opacity-60">
+                  <MapPin className="w-3 h-3 text-gray-500" />
+                  <span className="text-[10px] font-medium text-gray-500 truncate uppercase tracking-tighter">
+                    {field.location || 'Location Pending'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                isSelected ? 'bg-green-500 text-white scale-110 shadow-lg' : 'bg-white/5 text-gray-600 group-hover:text-gray-300'
+              }`}>
+                <ChevronRight className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* Micro Progress Bar */}
+            <div className="mt-4 w-full h-1 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-1000 ease-out ${
+                  isSelected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-green-500/30'
+                }`}
+                style={{ width: `${(fields.indexOf(field) + 1) * 20}%` }} // Mock progress for list
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
-  );
-};
-
-const FieldCard = ({ field, isSelected, onSelect }) => {
-  const stageColors = {
-    Planted: { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700' },
-    Growing: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700' },
-    Ready: { bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-700' },
-    Harvested: { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700' }
-  };
-
-  const getUrgencyClass = () => {
-    if (field.stageOverdue) return 'border-l-4 border-l-red-600 bg-red-50';
-    if (field.stageAlert) return 'border-l-4 border-l-yellow-500 bg-yellow-50';
-    return 'border-l-4 border-l-green-500';
-  };
-
-  const stageColor = stageColors[field.mappedCategory] || stageColors.Growing;
-
-  return (
-    <button
-      onClick={() => onSelect(field)}
-      className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 ${
-        isSelected ? 'border-green-600 ring-2 ring-green-200 bg-green-50 shadow-md' : `${getUrgencyClass()} border-gray-200`
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-black text-lg text-gray-900 truncate">{field.name}</h3>
-          <div className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
-            <Leaf className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="truncate font-medium">{field.cropType?.name || 'Unknown'}</span>
-          </div>
-        </div>
-
-        {/* Urgency Icon */}
-        {field.stageOverdue && (
-          <div className="flex-shrink-0 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-black">
-            !
-          </div>
-        )}
-        {field.stageAlert && !field.stageOverdue && (
-          <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm font-black">
-            ⏱
-          </div>
-        )}
-      </div>
-
-      {/* Current Stage Badge */}
-      <div className={`inline-block px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border ${stageColor.bg} ${stageColor.border} ${stageColor.text}`}>
-        {field.currentStage}
-      </div>
-
-      {/* Urgency Message */}
-      {field.stageOverdue && (
-        <p className="text-xs font-bold text-red-700 mt-3 flex items-center gap-1">
-          ⚠️ Immediate Update Required
-        </p>
-      )}
-      {field.stageAlert && !field.stageOverdue && (
-        <p className="text-xs font-bold text-yellow-700 mt-3 flex items-center gap-1">
-          ⏱️ Transition Soon
-        </p>
-      )}
-    </button>
   );
 };
 

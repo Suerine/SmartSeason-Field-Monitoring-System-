@@ -6,6 +6,8 @@ import TaskBox from './TaskBox';
 import StageStepper from './StageStepper';
 import UpdateForm from './UpdateForm';
 import RecentHistory from './RecentHistory';
+import NotificationBar from './NotificationBar';
+import { LayoutGrid, Info } from 'lucide-react';
 
 const AgentDashboardContainer = () => {
   const { user } = useAuth();
@@ -51,7 +53,6 @@ const AgentDashboardContainer = () => {
       const updatedField = data;
       setSelectedField(updatedField);
       setFields(fields.map(f => (f._id === updatedField._id ? updatedField : f)));
-      alert('Field updated successfully!');
     } catch (err) {
       console.error(err);
       alert('Failed to update field. Please try again.');
@@ -62,103 +63,118 @@ const AgentDashboardContainer = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Loading your fields…</p>
+      <div className="flex flex-col items-center justify-center h-96 gap-6">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-green-500/10 border-t-green-500 rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-full"></div>
         </div>
-      </div>
-    );
-  }
-
-  if (error && fields.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl border border-red-100">
-          ⚠️ {error}
-        </p>
+        <p className="text-sm font-black text-green-500 uppercase tracking-widest animate-pulse">Synchronizing Data...</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      {/* Left Column: Fields List */}
-      <div className="xl:col-span-1">
-        <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden h-fit">
-          <div className="px-6 py-5 border-b-2 border-gray-200 bg-gradient-to-r from-white to-gray-50">
-            <h3 className="font-black text-gray-900 text-base uppercase tracking-wide">Assigned Fields</h3>
-            <p className="text-xs text-gray-500 font-bold mt-0.5">{fields.length} field{fields.length !== 1 ? 's' : ''}</p>
+    <div className="space-y-8">
+      {/* Notifications Section */}
+      <NotificationBar fields={fields} />
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Left Column: Fields List (4 cols) */}
+        <div className="xl:col-span-4 space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <LayoutGrid className="w-4 h-4 text-green-500" />
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Your Assigned Fields</h3>
+            <span className="ml-auto text-[10px] font-black text-green-500/40">{fields.length} ACTIVE</span>
           </div>
-          <div className="max-h-[600px] overflow-y-auto">
-            <FieldsList
-              fields={fields}
-              selectedFieldId={selectedField?._id}
-              onSelectField={setSelectedField}
-            />
+          
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden">
+            <div className="max-h-[700px] overflow-y-auto no-scrollbar">
+              <FieldsList
+                fields={fields}
+                selectedFieldId={selectedField?._id}
+                onSelectField={setSelectedField}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Column: Field Details */}
-      <div className="xl:col-span-2">
-        {selectedField ? (
-          <div className="space-y-6">
-            {/* Header Card */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-6">
-              <h2 className="text-2xl font-black text-gray-900 mb-1">{selectedField.name}</h2>
-              <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-700">{selectedField.cropType?.name || 'Unknown Crop'}</span>
-                {selectedField.location && <> • {selectedField.location}</>}
-              </p>
-              {selectedField.currentStage && (
-                <div className="mt-4">
-                  <span className="inline-block px-3 py-1.5 bg-green-50 border-2 border-green-200 text-green-700 text-xs font-bold uppercase tracking-wider rounded-lg">
-                    Current Stage: {selectedField.currentStage}
-                  </span>
+        {/* Right Column: Field Details (8 cols) */}
+        <div className="xl:col-span-8">
+          {selectedField ? (
+            <div className="space-y-8">
+              {/* Main Detail Card */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 md:p-10">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] font-black text-green-500 uppercase tracking-widest">
+                          {selectedField.cropType?.name || 'Crop'}
+                        </span>
+                        {selectedField.location && (
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                            {selectedField.location}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4">
+                        {selectedField.name}
+                      </h2>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                      <div className="text-[10px] font-black text-green-500/40 uppercase tracking-widest mb-2 text-right">Current Phase</div>
+                      <div className="text-2xl font-black text-white uppercase tracking-tight">
+                        {selectedField.currentStage}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Growth Progress (Lifecycle Map Style) */}
+                  <div className="mt-12">
+                     <StageStepper
+                      stages={selectedField.cropType?.growthStages || []}
+                      currentStageName={selectedField.currentStage}
+                    />
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Dynamic Content Panels */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-8">
+                  <TaskBox
+                    careInstructions={
+                      selectedField.cropType?.growthStages?.find(
+                        s => s.stageName === selectedField.currentStage
+                      )?.careInstructions
+                    }
+                    currentStage={selectedField.currentStage}
+                  />
+                  <UpdateForm
+                    field={selectedField}
+                    stages={selectedField.cropType?.growthStages || []}
+                    onSubmit={handleUpdateField}
+                    isSubmitting={isSubmitting}
+                  />
+                </div>
+                
+                <div className="space-y-8">
+                  <RecentHistory updates={selectedField.updates} />
+                </div>
+              </div>
             </div>
-
-            {/* Content Cards */}
-            <div className="space-y-5">
-              {/* Care Instructions */}
-              <TaskBox
-                careInstructions={
-                  selectedField.cropType?.growthStages?.find(
-                    s => s.stageName === selectedField.currentStage
-                  )?.careInstructions
-                }
-                currentStage={selectedField.currentStage}
-              />
-
-              {/* Growth Timeline */}
-              {selectedField.cropType?.growthStages && (
-                <StageStepper
-                  stages={selectedField.cropType.growthStages}
-                  currentStageName={selectedField.currentStage}
-                />
-              )}
-
-              {/* Update Form */}
-              {selectedField.cropType?.growthStages && (
-                <UpdateForm
-                  field={selectedField}
-                  stages={selectedField.cropType.growthStages}
-                  onSubmit={handleUpdateField}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-
-              {/* Recent History */}
-              <RecentHistory updates={selectedField.updates} />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-white/5 backdrop-blur-xl border border-white/10 border-dashed rounded-[3rem] p-12 text-center">
+              <div className="w-20 h-20 bg-green-500/10 rounded-[2rem] flex items-center justify-center mb-6">
+                <Info className="w-10 h-10 text-green-500" />
+              </div>
+              <h3 className="text-2xl font-black text-white tracking-tight mb-2">Select a Field</h3>
+              <p className="text-gray-400 max-w-xs mx-auto">Choose a field from the list to view detailed status and log updates.</p>
             </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-96 bg-white rounded-2xl border-2 border-gray-200">
-            <p className="text-gray-400 font-semibold">Select a field to view details</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -30,6 +30,14 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
+      keyframes: {
+        shine: {
+          '100%': { left: '125%' },
+        },
+      },
+      animation: {
+        shine: 'shine 0.8s ease-in-out',
+      },
     },
   },
   plugins: [],
