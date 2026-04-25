@@ -4,15 +4,15 @@ SmartSeason is a high-performance, role-based field monitoring platform designed
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 👑 Administrator Dashboard
+### Administrator Dashboard
 - **KPI Overview**: Real-time tracking of total fields, active projects, and at-risk crops.
 *   **Urgent Attention Feed**: Automatically flags fields that require immediate intervention based on status updates or agent silence.
 - **Crop Health Analysis**: Visual breakdown of field health distributed across different crop types.
 - **Agent Workload Tracking**: Monitor the number of fields assigned to each agent to ensure balanced operations.
 
-### 🛡️ Field Agent Dashboard
+### Field Agent Dashboard
 - **Priority Notification Bar**: A dynamic alert system that highlights overdue stages, harvest readiness, and inactivity directly at the top of the screen.
 - **Interactive Growth Map**: A horizontal lifecycle visualization that tracks crops from Planting to Harvest, inspired by professional agricultural mapping.
 - **Detailed Field Panels**: Access stage-specific care instructions (Protocols) and log field observations with ease.
@@ -20,7 +20,7 @@ SmartSeason is a high-performance, role-based field monitoring platform designed
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React 19** with **Vite** for lightning-fast development and optimized builds.
@@ -37,7 +37,7 @@ SmartSeason is a high-performance, role-based field monitoring platform designed
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -88,7 +88,7 @@ npm run dev
 
 ---
 
-## 🧪 Testing the Application
+## Testing the Application
 
 ### 1. Authentication
 - **Admin Access**: Log in using `admin@smartseason.com` / `admin123`.
@@ -103,25 +103,3 @@ npm run dev
    - Use the **Update Form** to transition a crop to its next growth stage (e.g., from "Vegetative" to "Flowering").
    - Observe the **Growth Map** updating in real-time.
 
----
-
-## 📁 Project Structure
-
-```text
-├── backend/
-│   ├── models/      # Mongoose Schemas (User, Field, Crop)
-│   ├── routes/      # Express API Endpoints
-│   ├── server.js    # Entry Point
-│   └── seed.js      # Database Seeder
-├── frontend/
-│   ├── src/
-│   │   ├── components/ # Modular UI components
-│   │   ├── pages/      # Top-level Page views
-│   │   ├── context/    # Auth & Global state
-│   │   └── utils/      # API helpers & constants
-```
-
----
-
-## 📄 License
-This project is licensed under the ISC License.
