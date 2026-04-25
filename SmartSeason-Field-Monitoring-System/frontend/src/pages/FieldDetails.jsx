@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api, { API_PATHS } from '../utils/apiPaths';
 import { useAuth } from '../context/AuthContext';
-import {
-  ArrowLeft, MapPin, User, Leaf, AlertTriangle, 
-  Clock, Target, CalendarDays, CheckCircle, ListPlus, Trash2
-} from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
+import FieldDetailsHeader from '../components/field-details/FieldDetailsHeader';
+import DateMetricsGrid from '../components/field-details/DateMetricsGrid';
+import LifecycleMap from '../components/field-details/LifecycleMap';
+import StageBreakdownTable from '../components/field-details/StageBreakdownTable';
+import FieldUpdatesPanel from '../components/field-details/FieldUpdatesPanel';
+import DeleteAction from '../components/field-details/DeleteAction';
 
 const FieldDetails = () => {
   const { id } = useParams();
@@ -121,183 +124,47 @@ const FieldDetails = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <Link to="/fields" className="inline-flex items-center gap-2 text-gray-500 hover:text-green-700 transition font-medium mb-6">
+        <Link
+          to="/fields"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-green-700 transition font-medium mb-6"
+        >
           <ArrowLeft className="w-4 h-4" /> Back to Fields
         </Link>
-        
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row justify-between md:items-center gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-extrabold text-gray-900">{field.name}</h1>
-              <span className={`px-3 py-1 bg-opacity-10 rounded-full text-xs font-bold uppercase tracking-wider ${
-                field.status === 'Active' ? 'bg-green-500 text-green-700' : 
-                field.status === 'At Risk' ? 'bg-red-500 text-red-700' : 'bg-slate-500 text-slate-700'
-              }`}>
-                {field.status}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center gap-1.5"><Leaf className="w-4 h-4 text-amber-500" /> {field.cropType?.name}</div>
-              <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-blue-500" /> {field.location || "Farm Area"}</div>
-              <div className="flex items-center gap-1.5"><User className="w-4 h-4 text-purple-500" /> Agent: {field.assignedAgent?.name || "Unassigned"}</div>
-            </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center">
-              <CalendarDays className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Date Started</p>
-              <p className="text-lg font-bold text-gray-900">{plantingDate.toLocaleDateString()}</p>
-            </div>
-          </div>
-          
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-              <Target className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Est. Completion</p>
-              <p className="text-lg font-bold text-gray-900">{expectedHarvestDate.toLocaleDateString()}</p>
-            </div>
-          </div>
+        {/* Field Header */}
+        <FieldDetailsHeader field={field} />
 
-          <div className={`p-5 rounded-2xl border flex items-center gap-4 ${isFinishedGlobally ? 'bg-slate-50 border-slate-200' : 'bg-white border-gray-100'}`}>
-            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${isFinishedGlobally ? 'bg-slate-200 text-slate-600' : 'bg-orange-50 text-orange-500'}`}>
-              <Clock className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Global Days Left</p>
-              <p className="text-lg font-bold text-gray-900">{isFinishedGlobally ? 'COMPLETED' : `${globalDaysLeft} Days`}</p>
-            </div>
-          </div>
-        </div>
+        {/* Date Metrics */}
+        <DateMetricsGrid
+          plantingDate={plantingDate}
+          expectedHarvestDate={expectedHarvestDate}
+          globalDaysLeft={globalDaysLeft}
+          isFinishedGlobally={isFinishedGlobally}
+        />
 
-        <div className="bg-white rounded-3xl p-6 md:p-10 border border-gray-100 shadow-sm mb-8">
-          <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2"><Target className="w-5 h-5 text-gray-400" /> Lifecycle Map</h2>
-          
-          <div className="relative mt-8 mb-6 mx-4">
-            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-2 bg-gray-100 rounded-full" />
-            
-            {(() => {
-              const buckets = ['Planted', 'Growing', 'Ready', 'Harvested'];
-              const STAGE_COLORS = {
-                'Planted': { bg: 'bg-amber-400', border: 'border-amber-400' },
-                'Growing': { bg: 'bg-green-500', border: 'border-green-500' },
-                'Ready': { bg: 'bg-orange-500', border: 'border-orange-500' },
-                'Harvested': { bg: 'bg-blue-500', border: 'border-blue-500' }
-              };
-              
-              let activeBucketIdx = buckets.indexOf(field.mappedCategory);
-              if (activeBucketIdx === -1) activeBucketIdx = 0; 
-              const lineFillPct = (activeBucketIdx / 3) * 100;
-              let activeColor = STAGE_COLORS[buckets[activeBucketIdx]];
-              
-              return (
-                <>
-                  <div className={`absolute top-1/2 left-0 -translate-y-1/2 h-2 rounded-full transition-all duration-700 ease-out ${activeColor.bg}`} style={{ width: `${lineFillPct}%` }} />
-                  {buckets.map((bucket, idx) => {
-                    const leftPct = (idx / 3) * 100;
-                    const isCurrent = idx === activeBucketIdx;
-                    const nodeColor = STAGE_COLORS[bucket];
-                    return (
-                      <div key={bucket} className="absolute top-1/2 -translate-y-1/2 -ml-4 w-8 h-8 flex items-center justify-center cursor-pointer group" style={{ left: `${leftPct}%` }}>
-                        <div className={`w-5 h-5 rounded-full border-[3px] transition-colors duration-500 ${idx <= activeBucketIdx ? `${nodeColor.border} bg-white shadow-md` : 'border-gray-200 bg-gray-50'}`}>
-                          {isCurrent && <div className={`w-2 h-2 m-[3px] rounded-full animate-pulse ${nodeColor.bg}`} />}
-                        </div>
-                        <div className="absolute top-10 flex flex-col items-center min-w-max">
-                          <span className={`text-xs font-bold ${isCurrent ? nodeColor.text : 'text-gray-400'}`}>{bucket}</span>
-                          {isCurrent && <span className="text-[10px] text-gray-400 mt-0.5">{field.currentStage}</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              );
-            })()}
-          </div>
-          <div className="h-10"></div>
-        </div>
-        
+        {/* Lifecycle Map */}
+        <LifecycleMap mappedCategory={field.mappedCategory} currentStage={field.currentStage} />
+
+        {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm overflow-hidden">
-            <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2"><ListPlus className="w-5 h-5 text-gray-400" /> Stage Breakdown</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-bold rounded-xl border-b border-gray-100">
-                  <tr>
-                    <th className="px-4 py-3 rounded-tl-lg">Stage name</th>
-                    <th className="px-4 py-3">Category</th>
-                    <th className="px-4 py-3 text-right">Duration</th>
-                    <th className="px-4 py-3 text-right rounded-tr-lg">Days Left</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {stages.map((stg, i) => {
-                    const isUpcoming = currentIdx !== -1 && i > currentIdx;
-                    const isCompleted = currentIdx !== -1 && i < currentIdx;
-                    const isCurrent = i === currentIdx;
-                    let daysLeftStr = "-";
-                    let rowClass = "text-gray-600";
-                    let icon = null;
-                    if (isCompleted) { daysLeftStr = "✔"; icon = <CheckCircle className="inline-block w-3.5 h-3.5 text-green-500 mr-2" />; }
-                    else if (isCurrent) { daysLeftStr = isFinishedGlobally ? "✔" : `${field.stageInfo?.daysUntilNextStage || 0}d left`; rowClass = "font-bold text-green-800 bg-green-50/30"; }
-                    else if (isUpcoming) { daysLeftStr = `${stg.durationDays}d total`; rowClass = "text-gray-400"; }
-                    return (
-                      <tr key={i} className={rowClass}>
-                        <td className="px-4 py-3 whitespace-nowrap">{icon}{stg.stageName}</td>
-                        <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-[10px] uppercase font-semibold ${isCurrent ? 'bg-green-100 text-green-700' : 'bg-gray-100'}`}>{stg.category}</span></td>
-                        <td className="px-4 py-3 text-right tabular-nums">{stg.durationDays}d</td>
-                        <td className="px-4 py-3 text-right tabular-nums">{daysLeftStr}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <StageBreakdownTable
+            stages={stages}
+            currentIdx={currentIdx}
+            isFinishedGlobally={isFinishedGlobally}
+            stageInfo={field.stageInfo}
+          />
 
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col">
-            <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2"><Clock className="w-5 h-5 text-gray-400" /> Field Updates</h2>
-            <div className="flex-1 overflow-y-auto max-h-80 mb-6 pr-2 space-y-4">
-              {field.updates?.length === 0 ? (
-                <p className="text-gray-400 italic text-sm text-center py-6">No updates logged yet.</p>
-              ) : (
-                [...(field.updates || [])].reverse().map((update, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-green-400 mt-2" />
-                      {i !== field.updates.length - 1 && <div className="w-px h-full bg-gray-100 my-1" />}
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-3 flex-1 border border-gray-100">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-[10px] font-bold uppercase text-green-700 bg-green-100 px-2 py-0.5 rounded">{update.stage}</span>
-                        <span className="text-[10px] text-gray-400">{new Date(update.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <p className="text-sm text-gray-700">{update.note}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            <form onSubmit={submitUpdate} className="mt-auto border-t border-gray-100 pt-4">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Record an Observation</label>
-              <textarea value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="Observed conditions..." className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm mb-3 focus:ring-2 focus:ring-green-500" rows="3" required />
-              <button type="submit" disabled={isUpdating} className="w-full bg-green-600 text-white font-bold text-sm py-2.5 rounded-xl hover:bg-green-700 transition disabled:opacity-50">{isUpdating ? 'Saving...' : 'Post Update'}</button>
-            </form>
-          </div>
+          <FieldUpdatesPanel
+            updates={field.updates}
+            newNote={newNote}
+            onNoteChange={setNewNote}
+            onSubmit={submitUpdate}
+            isUpdating={isUpdating}
+          />
         </div>
 
-        {user?.role === 'admin' && (
-          <div className="mt-12 pt-8 border-t border-gray-200 flex justify-center">
-            <button onClick={handleDelete} className="px-6 py-2.5 bg-white text-red-600 border border-red-200 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-red-50 flex items-center gap-2 transition-colors">
-              <Trash2 className="w-4 h-4" /> Delete Field Tracking
-            </button>
-          </div>
-        )}
+        {/* Delete Action */}
+        <DeleteAction userRole={user?.role} onDelete={handleDelete} />
       </div>
     </div>
   );
