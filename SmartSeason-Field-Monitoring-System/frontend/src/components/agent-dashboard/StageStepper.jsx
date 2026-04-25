@@ -1,80 +1,53 @@
 import React from 'react';
-import { Target, Zap } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 const StageStepper = ({ stages, currentStageName }) => {
-  const buckets = ['Planted', 'Growing', 'Ready', 'Harvested'];
-  const CATEGORY_COLORS = {
-    'Planted': 'from-amber-400 to-amber-600',
-    'Growing': 'from-green-400 to-emerald-600',
-    'Ready': 'from-orange-400 to-red-600',
-    'Harvested': 'from-blue-400 to-indigo-600'
-  };
-
-  // Find the current stage object to get its category
-  const currentStageObj = stages.find(s => s.stageName === currentStageName);
-  const mappedCategory = currentStageObj?.category || 'Planted';
-
-  let activeBucketIdx = buckets.indexOf(mappedCategory);
-  if (activeBucketIdx === -1) activeBucketIdx = 0;
-  
-  const lineFillPct = (activeBucketIdx / 3) * 100;
-  const currentCategoryColor = CATEGORY_COLORS[mappedCategory] || CATEGORY_COLORS['Planted'];
+  const currentIdx = stages.findIndex(s => s.stageName === currentStageName);
 
   return (
-    <div className="relative pt-12 pb-16">
-      {/* Background Track */}
-      <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1 bg-white/5 rounded-full" />
+    <div className="bg-white rounded-2xl p-5 border-2 border-gray-200">
+      <h3 className="font-black text-gray-900 text-sm uppercase tracking-wide mb-4">
+        Growth Timeline
+      </h3>
 
-      {/* Progress Track */}
-      <div
-        className={`absolute top-1/2 left-0 -translate-y-1/2 h-1 rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${currentCategoryColor} shadow-[0_0_20px_rgba(34,197,94,0.3)]`}
-        style={{ width: `${lineFillPct}%` }}
-      />
-
-      <div className="relative flex justify-between">
-        {buckets.map((bucket, idx) => {
-          const isCurrent = idx === activeBucketIdx;
-          const isPassed = idx < activeBucketIdx;
-          const bucketColor = CATEGORY_COLORS[bucket];
+      <div className="space-y-3">
+        {stages.map((stage, idx) => {
+          const isCompleted = idx < currentIdx;
+          const isCurrent = idx === currentIdx;
+          const isUpcoming = idx > currentIdx;
 
           return (
-            <div key={bucket} className="relative flex flex-col items-center">
-              {/* Node */}
-              <div
-                className={`relative w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 border ${
-                  isCurrent
-                    ? `bg-green-500 border-green-400 shadow-[0_0_30px_rgba(34,197,94,0.4)] scale-110 z-10`
-                    : isPassed
-                    ? `bg-white/10 border-green-500/50`
-                    : 'bg-white/5 border-white/10'
-                }`}
-              >
-                {isCurrent ? (
-                  <Zap className="w-5 h-5 text-white animate-pulse" />
-                ) : isPassed ? (
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                ) : (
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                )}
-
-                {/* Pulse ring for current node */}
-                {isCurrent && (
-                  <div className="absolute -inset-1 border border-green-500 rounded-2xl animate-ping opacity-30" />
+            <div key={idx} className="flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center font-black text-xs flex-shrink-0 ${
+                    isCompleted
+                      ? 'bg-green-500 border-green-500 text-white'
+                      : isCurrent
+                      ? 'bg-green-100 border-green-500 text-green-700 ring-2 ring-green-200'
+                      : 'bg-gray-100 border-gray-300 text-gray-400'
+                  }`}
+                >
+                  {isCompleted ? '✓' : idx + 1}
+                </div>
+                {idx !== stages.length - 1 && (
+                  <div
+                    className={`w-0.5 h-8 my-1 ${
+                      isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                    }`}
+                  />
                 )}
               </div>
 
-              {/* Label */}
-              <div className="absolute top-14 flex flex-col items-center min-w-max">
-                <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
-                  isCurrent ? 'text-white' : 'text-gray-500'
-                }`}>
-                  {bucket}
-                </span>
-                {isCurrent && (
-                  <span className="text-[9px] font-bold text-green-500 mt-1 uppercase">
-                    {currentStageName}
-                  </span>
-                )}
+              <div className="pt-1 flex-1">
+                <p className={`text-sm font-black ${isCompleted ? 'text-green-700' : isCurrent ? 'text-green-700' : 'text-gray-500'}`}>
+                  {stage.stageName}
+                </p>
+                <p className={`text-xs ${isCompleted ? 'text-green-600' : isCurrent ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {stage.durationDays}d
+                  {isCompleted && ' ✓ Completed'}
+                  {isCurrent && ' (Now)'}
+                </p>
               </div>
             </div>
           );
