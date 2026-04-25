@@ -6,6 +6,7 @@ import TaskBox from './TaskBox';
 import StageStepper from './StageStepper';
 import UpdateForm from './UpdateForm';
 import RecentHistory from './RecentHistory';
+import NotificationBar from './NotificationBar';
 
 const AgentDashboardContainer = () => {
   const { user } = useAuth();
@@ -82,7 +83,10 @@ const AgentDashboardContainer = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      <NotificationBar fields={fields} />
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       {/* Left Column: Fields List */}
       <div className="xl:col-span-1">
         <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden h-fit">
