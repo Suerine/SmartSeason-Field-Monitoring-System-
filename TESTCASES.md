@@ -2,7 +2,7 @@
 
 The database comes pre-loaded with 4 agents, 12 crop types, and 16 fields in various states — some healthy, some overdue, some completed. The scenarios below walk through the core functionality using that data.
 
-> **Note:** The backend runs on Render's free tier, which spins down after inactivity. If the login takes 20–30 seconds on first load, that's normal. It won't happen again during your session.
+> **Note:** The backend runs on Render's free tier, which spins down after inactivity. If the login takes 20–30 seconds on first load or gives an Authentication error at the start, that's normal. Try again and it won't happen again during your session. 
 
 ---
 
