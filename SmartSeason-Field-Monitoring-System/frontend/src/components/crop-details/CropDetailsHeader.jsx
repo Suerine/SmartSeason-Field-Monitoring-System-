@@ -14,9 +14,8 @@ const CropDetailsHeader = ({
 }) => {
   return (
     <div
-      className={`rounded-3xl p-6 md:p-8 border shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden transition-colors ${
-        isEditing ? 'bg-amber-50/30 border-amber-200' : 'bg-white border-gray-100'
-      }`}
+      className={`rounded-3xl p-6 md:p-8 border shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden transition-colors ${isEditing ? 'bg-amber-50/30 border-amber-200' : 'bg-white border-gray-100'
+        }`}
     >
       <Leaf className="absolute -right-8 -top-8 w-48 h-48 text-gray-50 opacity-50 rotate-12 pointer-events-none" />
       <div className="relative z-10 w-full flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -27,7 +26,7 @@ const CropDetailsHeader = ({
                 type="text"
                 value={draftCrop.name}
                 onChange={(e) => onDraftChange({ ...draftCrop, name: e.target.value })}
-                className="text-3xl font-extrabold text-gray-900 mb-2 truncate w-full bg-white border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                className="text-2xl font-bold text-gray-900 mb-2 truncate w-full bg-white border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-green-500 focus:outline-none"
               />
               <textarea
                 value={draftCrop.description}
@@ -38,7 +37,7 @@ const CropDetailsHeader = ({
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-extrabold text-gray-900 mb-2 truncate w-full">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 truncate w-full">
                 {crop.name}
               </h1>
               <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">

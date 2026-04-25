@@ -5,7 +5,7 @@ const KpiCard = ({ label, value, icon, accent, sub }) => (
         </div>
         <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-0.5">{label}</p>
-            <p className="text-3xl font-bold text-gray-800 leading-none">{value}</p>
+            <p className="text-2xl font-bold text-gray-800 leading-none">{value}</p>
             {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
         </div>
     </div>

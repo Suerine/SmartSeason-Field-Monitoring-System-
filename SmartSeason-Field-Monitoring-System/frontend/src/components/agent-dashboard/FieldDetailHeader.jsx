@@ -12,7 +12,7 @@ const FieldDetailHeader = ({ field, onBack }) => {
         Back
       </button>
 
-      <h2 className="text-3xl font-black text-gray-900 mb-3">{field.name}</h2>
+      <h2 className="text-2xl font-black text-gray-900 mb-3">{field.name}</h2>
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="flex items-center gap-2 text-gray-700 font-bold">
@@ -27,11 +27,10 @@ const FieldDetailHeader = ({ field, onBack }) => {
           <User className="w-4 h-4 text-purple-500 flex-shrink-0" />
           <span className="truncate">Assigned to You</span>
         </div>
-        <div className={`inline-block px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border ${
-          field.status === 'Active'
+        <div className={`inline-block px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border ${field.status === 'Active'
             ? 'bg-green-50 border-green-300 text-green-700'
             : 'bg-gray-50 border-gray-300 text-gray-700'
-        }`}>
+          }`}>
           {field.status}
         </div>
       </div>
