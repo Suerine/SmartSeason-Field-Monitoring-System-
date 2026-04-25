@@ -12,6 +12,8 @@ export default function Navbar() {
     ...(user?.role === 'admin' ? [
       { to: '/agents', label: 'Agents'},
       { to: '/crops', label: 'Crops'},
+    ] : user?.role === 'agent' ? [
+      { to: '/crops', label: 'Crops'},
     ] : []),
   ];
 
