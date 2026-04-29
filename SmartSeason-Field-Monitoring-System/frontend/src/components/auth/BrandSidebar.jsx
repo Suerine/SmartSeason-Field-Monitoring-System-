@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Globe } from 'lucide-react';
+import { ShieldCheck, Globe, LayoutDashboard } from 'lucide-react';
 import logo from '../../assets/shambaRecords-logo.svg';
 
 const BrandSidebar = () => {
@@ -66,26 +66,26 @@ const BrandSidebar = () => {
         <div className="flex justify-center gap-8 mt-16">
           <div className="flex flex-col items-center gap-3">
             <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-              <ShieldCheck className="w-7 h-7 text-green-500" />
+              <LayoutDashboard className="w-7 h-7 text-green-500"/>
             </div>
             <span className="text-[10px] text-green-400/50 font-black uppercase tracking-[0.2em]">
-              Secure Access
+              Clean Dashboard
             </span>
           </div>
           <div className="flex flex-col items-center gap-3">
             <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-              <Globe className="w-7 h-7 text-green-500" />
+              <Globe className="w-7 h-7 text-green-500"/>
             </div>
             <span className="text-[10px] text-green-400/50 font-black uppercase tracking-[0.2em]">
-              Global Sync
+              Access Anywhere
             </span>
           </div>
         </div>
       </div>
 
       {/* Floating Forensic Elements */}
-      <div className="absolute bottom-12 right-12 text-white/5 text-[150px] font-black pointer-events-none select-none leading-none">
-        AGRI_OS
+      <div className="absolute bottom-12 right-12 text-white/5 text-[100px] font-black pointer-events-none select-none leading-none">
+        AGRI_TECH
       </div>
     </div>
   );
